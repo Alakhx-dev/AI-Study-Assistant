@@ -1,81 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Study Assistant</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <div class="page">
-      <header class="hero">
-        <div>
-          <p class="eyebrow">AI Powered Study Assistant</p>
-          <h1>Turn images, questions, and videos into exam-ready mastery.</h1>
-          <p class="subhead">
-            Upload your notes, solve complex questions, and turn YouTube lectures
-            into concise summaries, MCQs, and structured notes.
-          </p>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">AI Study Assistant</h1>
+            <button class="logout-btn">Logout</button>
         </div>
-        <div class="hero-card">
-          <h3>Fast Results</h3>
-          <ul>
-            <li>Concise summaries</li>
-            <li>Exam-style MCQs</li>
-            <li>Step-by-step solutions</li>
-            <li>Structured revision notes</li>
-          </ul>
+    </nav>
+
+    <main class="main-content">
+        <div class="cards-container">
+            <div class="card">
+                <div class="card-icon">📷</div>
+                <h3>Image → Summary & MCQ</h3>
+                <p>Upload an image to get a summary and multiple-choice questions.</p>
+                <input type="file" id="image-input" accept="image/*">
+                <button class="btn-primary" onclick="uploadImage()">Upload & Process</button>
+                <div id="image-result" class="result"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">❓</div>
+                <h3>Question → Solution</h3>
+                <p>Enter a question to get a detailed solution.</p>
+                <textarea id="question-input" placeholder="Enter your question here..."></textarea>
+                <button class="btn-primary" onclick="solveQuestion()">Solve Question</button>
+                <div id="question-result" class="result"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">📺</div>
+                <h3>YouTube → Summary, MCQ, Notes</h3>
+                <p>Provide a YouTube URL to get summary, MCQs, and notes.</p>
+                <input type="url" id="youtube-input" placeholder="https://www.youtube.com/watch?v=...">
+                <button class="btn-primary" onclick="processYouTube()">Process Video</button>
+                <div id="youtube-result" class="result"></div>
+            </div>
         </div>
-      </header>
-
-      <main class="grid">
-        <section class="card">
-          <h2>Image → Summary + MCQ</h2>
-          <p>Upload notes, book pages, or slides and get instant summaries.</p>
-          <form id="imageForm">
-            <label class="file-input">
-              <input type="file" id="imageInput" accept="image/png,image/jpeg" />
-              <span>Choose image</span>
-            </label>
-            <button type="submit">Process Image</button>
-          </form>
-          <div class="result" id="imageResult"></div>
-        </section>
-
-        <section class="card">
-          <h2>Question Solver</h2>
-          <p>Type a question or upload a photo. Get step-by-step solutions.</p>
-          <form id="questionForm">
-            <textarea
-              id="questionText"
-              placeholder="Type your question here..."
-            ></textarea>
-            <label class="file-input">
-              <input type="file" id="questionImage" accept="image/png,image/jpeg" />
-              <span>Upload question image</span>
-            </label>
-            <button type="submit">Solve</button>
-          </form>
-          <div class="result" id="solutionResult"></div>
-        </section>
-
-        <section class="card wide">
-          <h2>YouTube → Summary + MCQ + Notes</h2>
-          <p>Paste a YouTube lecture link and get a full study pack.</p>
-          <form id="youtubeForm">
-            <input
-              type="url"
-              id="youtubeUrl"
-              placeholder="https://www.youtube.com/watch?v=..."
-              required
-            />
-            <button type="submit">Process Video</button>
-          </form>
-          <div class="result" id="youtubeResult"></div>
-        </section>
-      </main>
-    </div>
+    </main>
 
     <script src="script.js"></script>
-  </body>
+</body>
 </html>

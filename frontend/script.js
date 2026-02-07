@@ -1,153 +1,106 @@
-const API_BASE = "http://localhost:5000";
-
-const imageForm = document.getElementById("imageForm");
-const imageInput = document.getElementById("imageInput");
-const imageResult = document.getElementById("imageResult");
-
-const questionForm = document.getElementById("questionForm");
-const questionText = document.getElementById("questionText");
-const questionImage = document.getElementById("questionImage");
-const solutionResult = document.getElementById("solutionResult");
-
-const youtubeForm = document.getElementById("youtubeForm");
-const youtubeUrl = document.getElementById("youtubeUrl");
-const youtubeResult = document.getElementById("youtubeResult");
-
-// Password toggle logic for login page
-const togglePassword = document.getElementById("togglePassword");
-const passwordInput = document.getElementById("password");
-
-if (togglePassword && passwordInput) {
-  togglePassword.addEventListener("click", () => {
-    const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
-    passwordInput.setAttribute("type", type);
-  });
+// Password toggle function
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+    input.setAttribute('type', type);
 }
 
-function setLoading(container, text = "Working on it...") {
-  container.innerHTML = `<p>${text}</p>`;
+// Upload Image
+async function uploadImage() {
+    const fileInput = document.getElementById('image-input');
+    const resultDiv = document.getElementById('image-result');
+
+    if (!fileInput.files[0]) {
+        alert('Please select an image file.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', fileInput.files[0]);
+
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = 'Processing...';
+
+    try {
+        const response = await fetch('http://127.0.0.1:5000/upload-image', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        resultDiv.innerHTML = `<strong>Summary:</strong> ${data.data.summary}<br><strong>MCQs:</strong> ${data.data.mcq.join(', ')}`;
+    } catch (error) {
+        resultDiv.innerHTML = 'Error processing image. Please try again.';
+    }
 }
 
-function renderSummaryAndMcq(container, summary, mcqs) {
-  container.innerHTML = "";
-  const summaryBlock = document.createElement("div");
-  summaryBlock.innerHTML = `<h4>Summary</h4><p>${summary}</p>`;
-  container.appendChild(summaryBlock);
+// Solve Question
+async function solveQuestion() {
+    const question = document.getElementById('question-input').value.trim();
+    const resultDiv = document.getElementById('question-result');
 
-  if (!Array.isArray(mcqs)) return;
-  const mcqBlock = document.createElement("div");
-  mcqBlock.innerHTML = `<h4>MCQ Quiz</h4>`;
-  container.appendChild(mcqBlock);
+    if (!question) {
+        alert('Please enter a question.');
+        return;
+    }
 
-  let score = 0;
-  let answered = 0;
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = 'Solving...';
 
-  mcqs.forEach((mcq, index) => {
-    const item = document.createElement("div");
-    item.className = "mcq-item";
-    const q = document.createElement("p");
-    q.textContent = `${index + 1}. ${mcq.question}`;
-    item.appendChild(q);
+    try {
+        const response = await fetch('http://127.0.0.1:5000/solve-question', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ question })
+        });
 
-    const options = document.createElement("div");
-    options.className = "mcq-options";
-
-    mcq.options.forEach((opt) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.textContent = opt;
-      btn.addEventListener("click", () => {
-        if (btn.disabled) return;
-        const buttons = options.querySelectorAll("button");
-        buttons.forEach((b) => (b.disabled = true));
-        answered += 1;
-        if (opt.trim() === mcq.answer.trim()) {
-          btn.classList.add("correct");
-          btn.textContent = `${opt} ✔`;
-          score += 1;
-        } else {
-          btn.classList.add("wrong");
-          btn.textContent = `${opt} ❌`;
-        }
-        if (answered === mcqs.length) {
-          const scoreEl = document.createElement("p");
-          scoreEl.className = "score";
-          scoreEl.textContent = `Final Score: ${score} / ${mcqs.length}`;
-          container.appendChild(scoreEl);
-        }
-      });
-      options.appendChild(btn);
-    });
-
-    item.appendChild(options);
-    container.appendChild(item);
-  });
+        const data = await response.json();
+        resultDiv.innerHTML = `<strong>Solution:</strong> ${data.data.solution}`;
+    } catch (error) {
+        resultDiv.innerHTML = 'Error solving question. Please try again.';
+    }
 }
 
-imageForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  if (!imageInput.files[0]) {
-    imageResult.innerHTML = "<p>Please upload an image.</p>";
-    return;
-  }
-  setLoading(imageResult);
+// Process YouTube
+async function processYouTube() {
+    const url = document.getElementById('youtube-input').value.trim();
+    const resultDiv = document.getElementById('youtube-result');
 
-  const formData = new FormData();
-  formData.append("image", imageInput.files[0]);
+    if (!url) {
+        alert('Please enter a YouTube URL.');
+        return;
+    }
 
-  try {
-    const res = await fetch(`${API_BASE}/upload-image`, {
-      method: "POST",
-      body: formData,
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Processing failed");
-    renderSummaryAndMcq(imageResult, data.summary, data.mcqs);
-  } catch (err) {
-    imageResult.innerHTML = `<p>${err.message}</p>`;
-  }
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = 'Processing...';
+
+    try {
+        const response = await fetch('http://127.0.0.1:5000/youtube-process', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ url })
+        });
+
+        const data = await response.json();
+        resultDiv.innerHTML = `<strong>Summary:</strong> ${data.data.summary}<br><strong>MCQs:</strong> ${data.data.mcq.join(', ')}<br><strong>Notes:</strong> ${data.data.notes}`;
+    } catch (error) {
+        resultDiv.innerHTML = 'Error processing video. Please try again.';
+    }
+}
+
+// Form submissions (dummy for now)
+document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Login functionality not implemented yet.');
+    window.location.href = 'index.html';
 });
 
-questionForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  setLoading(solutionResult);
-
-  const formData = new FormData();
-  formData.append("question", questionText.value.trim());
-  if (questionImage.files[0]) {
-    formData.append("image", questionImage.files[0]);
-  }
-
-  try {
-    const res = await fetch(`${API_BASE}/solve-question`, {
-      method: "POST",
-      body: formData,
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Failed to solve question");
-    solutionResult.innerHTML = `<h4>Solution</h4><p>${data.solution}</p>`;
-  } catch (err) {
-    solutionResult.innerHTML = `<p>${err.message}</p>`;
-  }
-});
-
-youtubeForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  setLoading(youtubeResult);
-
-  try {
-    const res = await fetch(`${API_BASE}/youtube-process`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: youtubeUrl.value.trim() }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Failed to process video");
-    renderSummaryAndMcq(youtubeResult, data.summary, data.mcqs);
-    const notesBlock = document.createElement("div");
-    notesBlock.innerHTML = `<h4>Notes</h4><p>${data.notes}</p>`;
-    youtubeResult.appendChild(notesBlock);
-  } catch (err) {
-    youtubeResult.innerHTML = `<p>${err.message}</p>`;
-  }
+document.getElementById('signup-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Signup functionality not implemented yet.');
+    window.location.href = 'login.html';
 });
