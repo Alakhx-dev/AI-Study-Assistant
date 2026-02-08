@@ -5,6 +5,54 @@ function togglePassword(inputId) {
     input.setAttribute('type', type);
 }
 
+// Login function
+function loginUser() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/home';
+        } else {
+            alert('Invalid login');
+        }
+    })
+    .catch(() => alert('Login error'));
+}
+
+// Signup function
+function signupUser() {
+    const username = document.getElementById('signupUsername').value;
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+
+    if (password !== confirmPassword) {
+        alert('Passwords do not match');
+        return;
+    }
+
+    fetch('/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/login';
+        } else {
+            alert('Signup failed');
+        }
+    })
+    .catch(() => alert('Signup error'));
+}
+
 // Signup
 if (document.getElementById('signup-form')) {
     document.getElementById('signup-form').addEventListener('submit', async function(e) {

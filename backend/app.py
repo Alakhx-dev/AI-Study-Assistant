@@ -199,13 +199,37 @@ def question():
 def youtube():
     return render_template('youtube.html')
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+    if request.method == 'GET':
+        return render_template('login.html')
+    else:
+        data = request.json
+        username = data.get('username')
+        password = data.get('password')
+        users = load_users()
+        if username in users and users[username] == password:
+            session['username'] = username
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False})
 
-@app.route('/signup')
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    return render_template('signup.html')
+    if request.method == 'GET':
+        return render_template('signup.html')
+    else:
+        data = request.json
+        username = data.get('username')
+        password = data.get('password')
+        if not username or not password:
+            return jsonify({'success': False})
+        users = load_users()
+        if username in users:
+            return jsonify({'success': False})
+        users[username] = password
+        save_users(users)
+        return jsonify({'success': True})
 
 @app.route('/upload-image', methods=['POST'])
 def upload_image():
