@@ -3,6 +3,7 @@ import re
 import json
 import io
 import google.generativeai as genai
+from google.api_core.exceptions import NotFound
 from flask import Flask, request, jsonify, render_template, session, redirect, make_response
 from flask_cors import CORS
 import pytesseract
@@ -38,6 +39,8 @@ def gemini_chat(prompt: str) -> str:
     try:
         response = model.generate_content(prompt)
         return response.text.strip()
+    except NotFound:
+        raise Exception("AI Model configuration error. Please update the SDK.")
     except Exception as e:
         raise Exception(f"Gemini API error: {str(e)}")
 
@@ -57,9 +60,7 @@ def summarize_youtube_fallback(url: str) -> str:
 
 @app.route('/')
 def index():
-    if 'username' in session:
-        return redirect('/home')
-    return redirect('/signup')
+    return "Backend is Running"
 
 @app.route('/image')
 def image():
@@ -227,4 +228,4 @@ def logout():
     return response
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
