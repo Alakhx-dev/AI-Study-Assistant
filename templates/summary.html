@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,24 +8,16 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <button class="nav-link" onclick="window.history.back()">← Back</button>
-            <h1 class="nav-title">AI Study Assistant</h1>
-            <a href="/home" class="nav-link">Back to Home</a>
-        </div>
-    </nav>
-
     <main class="main-content">
         <div class="intro-section">
-            <h2>Generate Summary & MCQs</h2>
-            <p>Upload an image or paste a link to get a summary and multiple-choice questions.</p>
+            <h2>Generate Summary</h2>
+            <p>Upload an image or paste a YouTube link to get a summary.</p>
         </div>
 
         <div class="feature-container">
             <div class="card">
-                <div class="card-icon">📷</div>
-                <h3>Generate Summary & MCQs</h3>
+                <div class="card-icon">Image</div>
+                <h3>Generate Summary</h3>
                 <div class="input-selection">
                     <button class="upload-button" id="imageButton" onclick="selectImageInput()">Upload Image</button>
                     <button class="upload-button" id="linkButton" onclick="selectLinkInput()">YouTube Link</button>
@@ -42,19 +34,17 @@
             </div>
         </div>
 
-        <!-- Modal -->
         <div id="uploadModal" class="modal">
             <div class="modal-content">
                 <span class="close" onclick="closeModal()">&times;</span>
                 <h3>Choose Upload Method</h3>
                 <div class="modal-options">
-                    <button class="modal-option" onclick="openCamera()">📷 Camera</button>
-                    <button class="modal-option" onclick="openGallery()">🖼 Gallery</button>
+                    <button class="modal-option" onclick="openCamera()">Camera</button>
+                    <button class="modal-option" onclick="openGallery()">Gallery</button>
                 </div>
             </div>
         </div>
 
-        <!-- Hidden inputs -->
         <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;">
         <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display: none;">
     </main>

@@ -1,177 +1,109 @@
 import os
+import re
+import io
+
 import google.generativeai as genai
+from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
+from PIL import Image
+import pytesseract
+from youtube_transcript_api import YouTubeTranscriptApi
+
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel("models/gemini-1.5-flash")
 
-import re
-import json
-import io
-from flask import Flask, request, jsonify, render_template, session, redirect, make_response
-from flask_cors import CORS
-import pytesseract
-from PIL import Image
-
-app = Flask(__name__, static_folder='static', template_folder='templates', static_url_path='')
-app.secret_key = 'your_secret_key_here'  # Change this to a random secret key
+app = Flask(
+    __name__,
+    template_folder="../templates",
+    static_folder="../static",
+)
 CORS(app)
-
-# Explicitly set Tesseract path for Windows
-pytesseract.pytesseract.tesseract_cmd = r"C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
-
-USERS_FILE = 'users.json'
-
-def load_users():
-    if os.path.exists(USERS_FILE):
-        with open(USERS_FILE, 'r') as f:
-            return json.load(f)
-    return {}
-
-def save_users(users):
-    with open(USERS_FILE, 'w') as f:
-        json.dump(users, f)
 
 def get_video_id(url):
     match = re.search(r'(?:v=|\/)([0-9A-Za-z_-]{11}).*', url)
     return match.group(1) if match else None
 
+def get_transcript_text(url):
+    video_id = get_video_id(url)
+    if not video_id:
+        return None
+    try:
+        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+    except Exception:
+        return None
+    parts = [item.get("text", "") for item in transcript]
+    text = " ".join(part for part in parts if part).strip()
+    return text or None
+
 def generate_summary(text):
     if not text or len(text) < 30:
         return None
     try:
-        return model.generate_content(
-            f"Summarize this text clearly:\n{text}"
-        ).text
+        response = model.generate_content(f"Summarize this text clearly:\n{text}")
+        return getattr(response, "text", None)
     except Exception:
         return None
 
 @app.route('/')
-def index():
-    return "Backend is Running"
+def home():
+    return render_template('summary.html')
 
-@app.route('/image')
-def image():
-    return render_template('image.html')
+def success_response(summary):
+    return jsonify({"summary": summary, "error": None})
 
-@app.route('/question')
-def question():
-    return render_template('question.html')
-
-@app.route('/youtube')
-def youtube():
-    return render_template('youtube.html')
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'GET':
-        return render_template('login.html')
-    else:
-        data = request.json
-        username = data.get('username')
-        password = data.get('password')
-        users = load_users()
-        if username in users and users[username] == password:
-            session['username'] = username
-            return jsonify({'success': True})
-        else:
-            return jsonify({'success': False})
-
-@app.route('/signup', methods=['GET', 'POST'])
-def signup():
-    if request.method == 'GET':
-        return render_template('signup.html')
-    else:
-        data = request.json
-        username = data.get('username')
-        password = data.get('password')
-        if not username or not password:
-            return jsonify({'success': False})
-        users = load_users()
-        if username in users:
-            return jsonify({'success': False})
-        users[username] = password
-        save_users(users)
-        return jsonify({'success': True})
+def error_response(message, status=400):
+    return jsonify({"summary": None, "error": message}), status
 
 @app.route('/upload-image', methods=['POST'])
 def upload_image():
+    if "image" not in request.files:
+        return error_response("Please upload an image.")
+
+    image_file = request.files["image"]
+    if image_file.filename == "":
+        return error_response("Please upload an image.")
+
     try:
-        if "image" not in request.files:
-            return jsonify({"summary": None, "error": "Unable to generate summary"}), 400
+        image_bytes = io.BytesIO(image_file.read())
+        image = Image.open(image_bytes)
+        extracted_text = pytesseract.image_to_string(image).strip()
+    except Exception:
+        extracted_text = ""
 
-        image = request.files["image"]
+    if not extracted_text:
+        return success_response(
+            "Image summary is currently unavailable on the deployed version."
+        )
 
-        if image.filename == "":
-            return jsonify({"summary": None, "error": "Unable to generate summary"}), 400
+    summary = generate_summary(extracted_text)
+    if not summary:
+        return success_response(
+            "Image summary is currently unavailable on the deployed version."
+        )
 
-        # Process image in memory using io.BytesIO
-        image_bytes = io.BytesIO(image.read())
-        img = Image.open(image_bytes)
-        extracted_text = pytesseract.image_to_string(img).strip()
-
-        if len(extracted_text) < 10:
-            return jsonify({"summary": None, "error": "Unable to generate summary"}), 400
-
-        summary = generate_summary(extracted_text)
-        if not summary:
-            return jsonify({"summary": None, "error": "Unable to generate summary"}), 500
-        return jsonify({"summary": summary, "error": None})
-    except Exception as e:
-        return jsonify({"summary": None, "error": "Unable to generate summary"}), 500
-
-@app.route('/solve-question', methods=['POST'])
-def solve_question():
-    try:
-        data = request.get_json()
-        if not data or 'question' not in data:
-            return jsonify({"summary": None, "error": "Unable to generate summary"}), 400
-
-        question = data['question'].strip()
-        if not question:
-            return jsonify({"summary": None, "error": "Unable to generate summary"}), 400
-
-        summary = generate_summary(question)
-        if not summary:
-            return jsonify({"summary": None, "error": "Unable to generate summary"}), 500
-        return jsonify({"summary": summary, "error": None})
-    except Exception as e:
-        return jsonify({"summary": None, "error": "Unable to generate summary"}), 500
+    return success_response(summary)
 
 @app.route('/youtube-process', methods=['POST'])
 def youtube_process():
-    return jsonify({"summary": None, "error": "YouTube summary is temporarily disabled"}), 200
+    data = request.get_json(silent=True) or {}
+    url = (data.get("url") or "").strip()
+    if not url:
+        return error_response("Please provide a YouTube link.")
 
-@app.route('/home')
-def home():
-    if 'username' not in session:
-        return redirect('/')
-    return render_template('home.html')
+    transcript_text = get_transcript_text(url)
+    if not transcript_text:
+        return success_response(
+            "YouTube summary is temporarily unavailable on the deployed version."
+        )
 
-@app.route('/summary')
-def summary():
-    if 'username' not in session:
-        return redirect('/')
-    return render_template('summary.html')
+    summary = generate_summary(transcript_text)
+    if not summary:
+        return success_response(
+            "YouTube summary is temporarily unavailable on the deployed version."
+        )
 
-@app.route('/solution')
-def solution():
-    if 'username' not in session:
-        return redirect('/')
-    return render_template('solution.html')
-
-@app.route('/notes')
-def notes():
-    if 'username' not in session:
-        return redirect('/')
-    return render_template('notes.html')
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    response = make_response(redirect('/signup'))
-    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    return response
+    return success_response(summary)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    debug_enabled = os.getenv("DEBUG", "False").lower() == "true"
+    app.run(host='0.0.0.0', port=5000, debug=debug_enabled)
