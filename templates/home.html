@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,11 +9,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
 </head>
+
 <body>
     <!-- Top Right Buttons -->
     <div class="top-right-buttons">
         <button class="icon-button profile-button" onclick="openProfileModal()">
-            <img id="profileImage" src="{{ url_for('static', filename='default-avatar.svg') }}" alt="Profile" class="profile-dp">
+            <img id="profileImage" src="{{ url_for('static', filename='default-avatar.svg') }}" alt="Profile"
+                class="profile-dp">
         </button>
         <button class="icon-button settings-button" onclick="toggleSettingsMenu()">⚙️</button>
     </div>
@@ -21,7 +24,8 @@
     <div id="settingsMenu" class="settings-dropdown">
         <div class="settings-option" onclick="applyLanguage('en')">English</div>
         <div class="settings-option" onclick="applyLanguage('hi')">Hindi</div>
-        <div class="settings-option" onclick="window.location.href='mailto:admin@aistudyassistant.com'">Contact Admin</div>
+        <div class="settings-option" onclick="window.location.href='mailto:admin@aistudyassistant.com'">Contact Admin
+        </div>
         <div class="settings-option" onclick="logoutUser()">Logout</div>
     </div>
 
@@ -53,14 +57,22 @@
             <span class="close" onclick="closeAvatarsModal()">&times;</span>
             <h2>Select Avatar</h2>
             <div class="avatars-grid">
-                <img src="{{ url_for('static', filename='avatars/avatar1.svg') }}" onclick="selectBuiltInAvatar(this.src)" class="avatar-option">
-                <img src="{{ url_for('static', filename='avatars/avatar2.svg') }}" onclick="selectBuiltInAvatar(this.src)" class="avatar-option">
-                <img src="{{ url_for('static', filename='avatars/avatar3.svg') }}" onclick="selectBuiltInAvatar(this.src)" class="avatar-option">
-                <img src="{{ url_for('static', filename='avatars/avatar4.svg') }}" onclick="selectBuiltInAvatar(this.src)" class="avatar-option">
-                <img src="{{ url_for('static', filename='avatars/avatar5.svg') }}" onclick="selectBuiltInAvatar(this.src)" class="avatar-option">
-                <img src="{{ url_for('static', filename='avatars/avatar6.svg') }}" onclick="selectBuiltInAvatar(this.src)" class="avatar-option">
-                <img src="{{ url_for('static', filename='avatars/avatar7.svg') }}" onclick="selectBuiltInAvatar(this.src)" class="avatar-option">
-                <img src="{{ url_for('static', filename='avatars/avatar8.svg') }}" onclick="selectBuiltInAvatar(this.src)" class="avatar-option">
+                <img src="{{ url_for('static', filename='avatars/avatar1.svg') }}"
+                    onclick="selectBuiltInAvatar(this.src)" class="avatar-option">
+                <img src="{{ url_for('static', filename='avatars/avatar2.svg') }}"
+                    onclick="selectBuiltInAvatar(this.src)" class="avatar-option">
+                <img src="{{ url_for('static', filename='avatars/avatar3.svg') }}"
+                    onclick="selectBuiltInAvatar(this.src)" class="avatar-option">
+                <img src="{{ url_for('static', filename='avatars/avatar4.svg') }}"
+                    onclick="selectBuiltInAvatar(this.src)" class="avatar-option">
+                <img src="{{ url_for('static', filename='avatars/avatar5.svg') }}"
+                    onclick="selectBuiltInAvatar(this.src)" class="avatar-option">
+                <img src="{{ url_for('static', filename='avatars/avatar6.svg') }}"
+                    onclick="selectBuiltInAvatar(this.src)" class="avatar-option">
+                <img src="{{ url_for('static', filename='avatars/avatar7.svg') }}"
+                    onclick="selectBuiltInAvatar(this.src)" class="avatar-option">
+                <img src="{{ url_for('static', filename='avatars/avatar8.svg') }}"
+                    onclick="selectBuiltInAvatar(this.src)" class="avatar-option">
             </div>
         </div>
     </div>
@@ -77,8 +89,8 @@
 
     <div class="home-container">
         <h1 class="home-heading" id="greeting">
-            <span class="greeting-en">How can I help you, {{ session.username }}?</span>
-            <span class="greeting-hi">मैं आपकी कैसे मदद कर सकता हूँ, {{ session.username }}?</span>
+            <span class="greeting-en">How can I help you, {{ session['user'] }}?</span>
+            <span class="greeting-hi">मैं आपकी कैसे मदद कर सकता हूँ, {{ session['user'] }}?</span>
         </h1>
         <div class="pill-buttons">
             <a href="/summary" class="pill-button">Summary</a>
@@ -88,14 +100,15 @@
     </div>
 
     <!-- Hidden inputs for camera/gallery -->
-    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handleCameraInput(event)">
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;"
+        onchange="handleCameraInput(event)">
     <input type="file" id="galleryInput" accept="image/*" style="display:none;" onchange="handleGalleryInput(event)">
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script>
         // Load profile image on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const profileImage = localStorage.getItem('profileImage');
             if (profileImage) {
                 document.getElementById('profileImage').src = profileImage;
@@ -105,4 +118,5 @@
         });
     </script>
 </body>
+
 </html>
