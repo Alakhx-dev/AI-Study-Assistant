@@ -144,11 +144,11 @@ const App: React.FC = () => {
   const t = TRANSLATIONS[language];
 
   return (
-    <div className={`flex min-h-[100dvh] overflow-hidden ${config.bg} ${config.gradient} bg-gradient-to-br transition-colors duration-500`}>
+    <div className={`flex flex-col min-h-[100dvh] w-full overflow-x-hidden ${config.bg} ${config.gradient} bg-gradient-to-br transition-colors duration-500`}>
       <FloatingHearts />
       <div
-        className="fixed pointer-events-none z-10 w-[600px] h-[600px] rounded-full blur-[120px] opacity-10 bg-pink-500"
-        style={{ left: mousePos.x - 300, top: mousePos.y - 300 }}
+        className="fixed pointer-events-none z-10 w-[300px] h-[300px] sm:w-[600px] sm:h-[600px] rounded-full blur-[120px] opacity-10 bg-pink-500 hidden sm:block"
+        style={{ left: mousePos.x - 150, top: mousePos.y - 150 }}
       ></div>
 
       <Sidebar
@@ -170,7 +170,7 @@ const App: React.FC = () => {
         <header className={`px-4 sm:px-6 py-4 flex items-center justify-between border-b ${config.border} bg-white/5 backdrop-blur-sm lg:hidden`}>
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className={`p-2 rounded-lg ${config.text}`}
+            className={`p-2 rounded-lg ${config.text} min-h-[44px] min-w-[44px] flex items-center justify-center`}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
