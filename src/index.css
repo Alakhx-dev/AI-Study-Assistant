@@ -6,25 +6,16 @@
 
 @layer base {
   :root {
-    /* Default variables (fallback) */
-    --bg-main: #050510;
-    --bg-card: rgba(20, 20, 40, 0.6);
-    --text-main: #ffffff;
-    --blur-strength: blur(16px);
-
-    /* Shadcn/Tailwind mappings - HSL Values */
-    --primary: 262 100% 59%;
-    /* #7b2cff */
-    --secondary: 190 100% 50%;
-    /* #00d4ff */
-
+    /* Shadcn/Tailwind Base */
     --background: 230 25% 4%;
     --foreground: 220 20% 92%;
     --card: 230 22% 7%;
     --card-foreground: 220 20% 92%;
     --popover: 230 22% 7%;
     --popover-foreground: 220 20% 92%;
+    --primary: 262 100% 59%;
     --primary-foreground: 0 0% 100%;
+    --secondary: 190 100% 50%;
     --secondary-foreground: 0 0% 100%;
     --muted: 230 18% 13%;
     --muted-foreground: 220 10% 55%;
@@ -37,138 +28,120 @@
     --ring: 262 100% 59%;
     --radius: 0.75rem;
 
-    /* Start with dark theme defaults for shadcn vars */
-    --sidebar-background: 230 22% 5%;
-    --sidebar-foreground: 220 10% 70%;
-    --sidebar-primary: 262 100% 59%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 230 18% 10%;
-    --sidebar-accent-foreground: 220 20% 92%;
-    --sidebar-border: 230 18% 13%;
-    --sidebar-ring: 262 100% 59%;
-  }
-
-  /* --- 1. Fusion Dark --- */
-  [data-theme="fusion-dark"] {
-    --bg-main: #050510;
+    /* Theme Defaults */
+    --bg-main: #0a0a1a;
     --bg-card: rgba(20, 20, 40, 0.6);
-    --primary: 262 100% 59%;
-    /* #7b2cff */
-    --secondary: 190 100% 50%;
-    /* #00d4ff */
     --text-main: #ffffff;
     --blur-strength: blur(16px);
+    --border-color: rgba(255, 255, 255, 0.1);
   }
 
-  /* --- 2. Neon Purple --- */
-  [data-theme="neon-purple"] {
-    --bg-main: radial-gradient(circle at 30% 20%, #1a0033, #000000);
-    --bg-card: rgba(30, 0, 60, 0.5);
-    --primary: 278 100% 57%;
-    /* #b026ff */
-    --secondary: 183 100% 50%;
-    /* #00f0ff */
+  /* 1. Neon Orbit */
+  [data-theme="neon-orbit"] {
+    --bg-main: radial-gradient(circle at 50% -20%, #2a1b4e 0%, #0a0a1a 100%);
+    --bg-card: rgba(13, 13, 25, 0.7);
+    --primary: 270 100% 65%;
+    --secondary: 180 100% 50%;
     --text-main: #ffffff;
-    --blur-strength: blur(18px);
-  }
-
-  /* --- 3. Orange Inferno --- */
-  [data-theme="orange-inferno"] {
-    --bg-main: linear-gradient(135deg, #1a0f00, #000000);
-    --bg-card: rgba(60, 20, 0, 0.6);
-    --primary: 25 100% 50%;
-    /* #ff6a00 */
-    --secondary: 35 100% 64%;
-    /* #ffb347 */
-    --text-main: #ffffff;
-    --blur-strength: blur(14px);
-  }
-
-  /* --- 4. Glass Light --- */
-  [data-theme="glass-light"] {
-    --bg-main: linear-gradient(135deg, #fdfbfb, #ebedee);
-    --bg-card: rgba(255, 255, 255, 0.5);
-    --primary: 262 100% 59%;
-    /* #7b2cff */
-    --secondary: 187 100% 41%;
-    /* #00bcd4 */
-    --text-main: #111111;
     --blur-strength: blur(20px);
-
-    /* Light theme overrides for shadcn */
-    --foreground: 220 20% 10%;
-    --card-foreground: 220 20% 10%;
-    --popover-foreground: 220 20% 10%;
-    --muted-foreground: 220 10% 40%;
+    --border-color: rgba(123, 44, 255, 0.2);
   }
 
-  /* --- 5. Ocean Blue --- */
-  [data-theme="ocean-blue"] {
-    --bg-main: radial-gradient(circle at top, #001f3f, #000814);
-    --bg-card: rgba(0, 30, 60, 0.6);
-    --primary: 193 100% 50%;
-    /* #00c6ff */
-    --secondary: 213 100% 50%;
-    /* #0072ff */
-    --text-main: #ffffff;
+  /* 2. Quantum Dark */
+  [data-theme="quantum-dark"] {
+    --bg-main: linear-gradient(135deg, #0f0f10 0%, #1a1a1a 100%);
+    --bg-card: rgba(30, 30, 30, 0.5);
+    --primary: 0 0% 100%;
+    --secondary: 0 0% 60%;
+    --text-main: #f0f0f0;
+    --blur-strength: blur(12px);
+    --border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  /* 3. Aurora Flow */
+  [data-theme="aurora-flow"] {
+    --bg-main: linear-gradient(180deg, #051015 0%, #022020 100%);
+    --bg-card: rgba(5, 25, 30, 0.6);
+    --primary: 170 100% 50%;
+    --secondary: 200 100% 60%;
+    --text-main: #e0faff;
     --blur-strength: blur(16px);
+    --border-color: rgba(0, 255, 153, 0.15);
   }
 
-  /* --- 6. Minimal Beige --- */
-  [data-theme="minimal-beige"] {
-    --bg-main: #f4f1ed;
-    --bg-card: #ffffff;
-    --primary: 0 15% 36%;
-    /* #6b4f4f */
-    --secondary: 30 34% 49%;
-    /* #a67c52 */
-    --text-main: #1c1c1c;
-    --blur-strength: none;
-
-    /* Light theme overrides */
-    --foreground: 20 10% 20%;
-    --card-foreground: 20 10% 20%;
-  }
-
-  /* --- 7. Midnight Pro --- */
-  [data-theme="midnight-pro"] {
-    --bg-main: linear-gradient(145deg, #0f2027, #203a43, #2c5364);
-    --bg-card: rgba(10, 20, 30, 0.7);
-    --primary: 174 100% 50%;
-    /* #00ffe5 */
-    --secondary: 312 100% 50%;
-    /* #ff00cc */
+  /* 4. Midnight Sapphire */
+  [data-theme="midnight-sapphire"] {
+    --bg-main: radial-gradient(circle at top right, #102040 0%, #020410 100%);
+    --bg-card: rgba(10, 20, 40, 0.7);
+    --primary: 220 100% 65%;
+    --secondary: 200 80% 60%;
     --text-main: #ffffff;
-    --blur-strength: blur(18px);
+    --blur-strength: blur(24px);
+    --border-color: rgba(100, 150, 255, 0.2);
   }
-}
 
-@layer base {
+  /* 5. Cyber Pulse */
+  [data-theme="cyber-pulse"] {
+    --bg-main: #000000;
+    --bg-card: rgba(10, 10, 10, 0.8);
+    --primary: 120 100% 50%;
+    --secondary: 0 0% 100%;
+    --text-main: #e0ffe0;
+    --blur-strength: blur(8px);
+    --border-color: rgba(0, 255, 0, 0.2);
+  }
+
+  /* 6. Ivory Glass */
+  [data-theme="ivory-glass"] {
+    --bg-main: #f8f9fa;
+    --bg-card: rgba(255, 255, 255, 0.6);
+    --primary: 240 5% 20%;
+    --secondary: 240 5% 50%;
+    --text-main: #111111;
+    --foreground: 240 5% 10%;
+    --muted-foreground: 240 5% 45%;
+    --blur-strength: blur(15px);
+    --border-color: rgba(0, 0, 0, 0.05);
+  }
+
+  /* 7. Emerald Luxe */
+  [data-theme="emerald-luxe"] {
+    --bg-main: linear-gradient(135deg, #05150a 0%, #020a05 100%);
+    --bg-card: rgba(10, 30, 15, 0.6);
+    --primary: 150 70% 50%;
+    --secondary: 45 80% 60%;
+    --text-main: #f0fff4;
+    --blur-strength: blur(16px);
+    --border-color: rgba(50, 200, 100, 0.2);
+  }
+
+  /* 8. Rose Romance */
+  [data-theme="rose-romance"] {
+    --bg-main: radial-gradient(circle at center, #fff0f5 0%, #fff5f8 100%);
+    --bg-card: rgba(255, 240, 245, 0.6);
+    --primary: 340 80% 60%;
+    --secondary: 340 60% 80%;
+    --text-main: #4a1a2a;
+    --foreground: 340 30% 20%;
+    --muted-foreground: 340 20% 50%;
+    --blur-strength: blur(12px);
+    --border-color: rgba(255, 105, 180, 0.15);
+  }
+
   * {
     @apply border-border;
   }
 
-  /* Scoped Transitions */
-  html {
-    transition: background 0.4s ease;
+  html,
+  body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
   }
 
-  body,
-  .card,
-  .card-glass,
-  .btn-primary,
-  .user-bubble,
-  .ai-bubble,
-  .sidebar,
-  button,
-  input,
-  textarea,
-  .settings-panel {
-    transition:
-      background 0.4s ease,
-      color 0.4s ease,
-      box-shadow 0.4s ease,
-      border-color 0.4s ease;
+  html {
+    transition: background 0.4s ease;
   }
 
   body {
@@ -178,7 +151,18 @@
     background-size: cover;
     color: var(--text-main);
     font-family: 'Space Grotesk', system-ui, sans-serif;
-    min-height: 100vh;
+    transition: background 0.4s ease, color 0.4s ease;
+    overflow-x: hidden;
+  }
+
+  .card,
+  .card-glass,
+  .btn-primary,
+  .sidebar,
+  button,
+  input,
+  textarea {
+    transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, transform 0.2s ease, opacity 0.2s ease;
   }
 
   code,
@@ -189,33 +173,33 @@
 }
 
 @layer components {
-  .card {
-    background: var(--bg-card);
-    backdrop-filter: var(--blur-strength);
-    -webkit-backdrop-filter: var(--blur-strength);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
 
+  .card,
   .card-glass {
     background: var(--bg-card);
     backdrop-filter: var(--blur-strength);
     -webkit-backdrop-filter: var(--blur-strength);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
   }
 
   .btn-primary {
     background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--secondary)));
-    box-shadow: 0 0 20px hsl(var(--primary) / 0.5);
     color: white;
     font-weight: 600;
     border: none;
+    box-shadow: 0 0 15px hsl(var(--primary) / 0.4);
+  }
+
+  [data-theme="rose-romance"] .btn-primary {
+    background: linear-gradient(90deg, #ff69b4, #ff8da1);
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
   }
 
   .btn-primary:hover {
     filter: brightness(1.1);
-    box-shadow: 0 0 30px hsl(var(--secondary) / 0.5);
     transform: translateY(-1px);
+    box-shadow: 0 0 25px hsl(var(--primary) / 0.5);
   }
 
   .user-bubble {
@@ -227,27 +211,14 @@
     background: var(--bg-card);
     backdrop-filter: var(--blur-strength);
     -webkit-backdrop-filter: var(--blur-strength);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
   }
 
   .sidebar {
     background: var(--bg-card);
     backdrop-filter: var(--blur-strength);
     -webkit-backdrop-filter: var(--blur-strength);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  /* Utility classes for direct usage */
-  .bg-main {
-    background: var(--bg-main);
-  }
-
-  .text-main {
-    color: var(--text-main);
-  }
-
-  .bg-card-theme {
-    background: var(--bg-card);
+    border-right: 1px solid var(--border-color);
   }
 }
 
@@ -257,7 +228,50 @@
     background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
   }
 
-  /* Scrollbar */
+  [data-theme="rose-romance"] .gradient-text {
+    background-image: linear-gradient(135deg, #ff69b4, #ffb7c5);
+  }
+
+  .glow-blue {
+    box-shadow: 0 0 15px hsl(var(--primary) / 0.3);
+  }
+
+  .glow-text {
+    text-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+  }
+
+  @keyframes gradient-shift {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  @keyframes pulse-glow {
+
+    0%,
+    100% {
+      opacity: 0.5;
+      transform: scale(1);
+    }
+
+    50% {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 4s ease-in-out infinite;
+  }
+
   ::-webkit-scrollbar {
     width: 6px;
   }
@@ -267,20 +281,11 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(150, 150, 150, 0.2);
     border-radius: 10px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-  }
-
-  /* Utilities for glow */
-  .glow-blue {
-    box-shadow: 0 0 15px hsl(var(--primary) / 0.3);
-  }
-
-  .glow-text {
-    text-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+    background: rgba(150, 150, 150, 0.4);
   }
 }

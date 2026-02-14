@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { CursorGlow } from "@/components/CursorGlow";
 import { Bot, Sparkles, MessageSquare, Shield, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GlobalHeader } from "@/components/GlobalHeader";
 import { useLanguage } from "@/context/LanguageContext";
 
 const Landing = () => {

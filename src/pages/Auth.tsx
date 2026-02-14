@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Bot, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GlobalHeader } from "@/components/GlobalHeader";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
@@ -61,6 +62,7 @@ const Auth = () => {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="relative z-10 w-full max-w-md"
       >
+        <GlobalHeader className="absolute -top-24 right-0 md:fixed md:top-6 md:right-6" authenticated={false} />
         {/* Logo */}
         <div className="mb-8 flex items-center justify-center gap-2" onClick={() => navigate("/")} role="button">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary glow-blue">
