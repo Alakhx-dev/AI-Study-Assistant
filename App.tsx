@@ -194,7 +194,7 @@ const App: React.FC = () => {
           />
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 p-3 sm:p-4 lg:static">
+        <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-slate-950/95 via-slate-950/90 to-transparent backdrop-blur-md p-3 sm:p-4 lg:static lg:bg-none lg:backdrop-blur-none">
           <ChatInput
             onSend={onSend}
             isLoading={isLoading}
