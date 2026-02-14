@@ -140,7 +140,7 @@ const Landing = () => {
               </span>
             </div>
             <p className="text-xs text-muted-foreground/60">
-              © {new Date().getFullYear()} Panda AI. Built with ❤️ for learners everywhere.
+              © {new Date().getFullYear()} Panda AI. Built with ❤️ by <span className="text-blue-400 font-semibold">Alakh</span>.
             </p>
           </div>
         </footer>
