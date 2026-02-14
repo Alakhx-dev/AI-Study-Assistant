@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import { Bot, Send, Plus, LogOut, MessageSquare, Loader2, Trash2 } from "lucide-react";
+import { Send, Plus, LogOut, MessageSquare, Loader2, Trash2, Mic, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/context/LanguageContext";
@@ -28,8 +28,11 @@ const Chat = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -68,6 +71,34 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Initialize Speech Recognition
+  useEffect(() => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) return;
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.continuous = false;
+    recognition.interimResults = true;
+
+    recognition.onresult = (event: any) => {
+      let transcript = "";
+      for (let i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setInput(transcript);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+  }, []);
+
   const createNewChat = useCallback(async () => {
     if (!user) return;
     const { data, error } = await supabase
@@ -85,6 +116,39 @@ const Chat = () => {
     await supabase.from("conversations").delete().eq("id", id);
     setConversations(prev => prev.filter(c => c.id !== id));
     if (activeConvoId === id) { setActiveConvoId(null); setMessages([]); }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setMessages(prev => [
+      ...prev,
+      {
+        role: "user",
+        content: `📎 Uploaded file: ${file.name}`
+      }
+    ]);
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleMicClick = () => {
+    if (!recognitionRef.current) {
+      toast.error("Speech recognition not supported in this browser");
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      recognitionRef.current.start();
+      setIsListening(true);
+    }
   };
 
   const sendMessage = async () => {
@@ -173,8 +237,10 @@ const Chat = () => {
     );
   }
 
+  const isEmpty = messages.length === 0 && !isLoading;
+
   return (
-    <div className="flex h-screen bg-transparent transition-colors duration-300">
+    <div className="chat-page flex h-screen transition-colors duration-300">
       {/* Sidebar */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -182,31 +248,35 @@ const Chat = () => {
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 280, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="flex h-full flex-col sidebar overflow-hidden"
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="flex h-full flex-col sidebar overflow-hidden border-r border-border/10"
           >
-            <div className="flex items-center gap-2 p-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary animate-glow-pulse">
-                <Bot className="h-4 w-4 text-primary-foreground" />
-              </div>
-              <span className="font-bold text-foreground">Panda <span className="gradient-text">AI</span></span>
+            {/* Header with Panda Logo */}
+            <div className="flex items-center gap-3 p-4 border-b border-border/10">
+              <img src="/panda.svg" className="w-9 h-9 panda-logo" alt="Panda AI" />
+              <span className="font-bold text-lg text-foreground">
+                Panda <span className="gradient-text">AI</span>
+              </span>
             </div>
 
-            <Button
-              onClick={createNewChat}
-              variant="outline"
-              className="mx-3 mb-3 border-border/40 bg-white/5 hover:bg-white/10 transition-all hover:border-primary/30"
-            >
-              <Plus className="mr-2 h-4 w-4" /> {t("newChat")}
-            </Button>
+            {/* New Chat Button */}
+            <div className="p-3">
+              <Button
+                onClick={createNewChat}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:-translate-y-0.5 transition-all duration-250"
+              >
+                <Plus className="mr-2 h-4 w-4" /> {t("newChat")}
+              </Button>
+            </div>
 
-            <div className="flex-1 overflow-y-auto px-2 space-y-0.5">
+            {/* Chat History */}
+            <div className="flex-1 overflow-y-auto px-2 space-y-1">
               {conversations.map((c) => (
                 <div
                   key={c.id}
-                  className={`group flex items-center gap-2 rounded-lg px-3 py-2 text-sm cursor-pointer transition-all duration-200 ${activeConvoId === c.id
-                    ? "bg-primary/10 text-primary border border-primary/20"
-                    : "text-muted-foreground hover:bg-white/5 border border-transparent"
+                  className={`group flex items-center gap-2 rounded-md px-3 py-2.5 text-sm cursor-pointer transition-all duration-250 ${activeConvoId === c.id
+                      ? "bg-primary/15 text-primary border border-primary/30"
+                      : "text-muted-foreground hover:bg-white/5 hover:text-foreground border border-transparent"
                     }`}
                   onClick={() => setActiveConvoId(c.id)}
                 >
@@ -222,11 +292,12 @@ const Chat = () => {
               ))}
             </div>
 
-            <div className="border-t border-border/20 p-3">
+            {/* Sign Out */}
+            <div className="border-t border-border/10 p-3">
               <Button
                 variant="ghost"
                 onClick={async () => { await signOut(); navigate("/"); }}
-                className="w-full justify-start text-muted-foreground hover:text-foreground transition-colors"
+                className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
               >
                 <LogOut className="mr-2 h-4 w-4" /> {t("signOut")}
               </Button>
@@ -235,15 +306,15 @@ const Chat = () => {
         )}
       </AnimatePresence>
 
-      {/* Main chat area */}
+      {/* Main Chat Area */}
       <div className="flex flex-1 flex-col">
         {/* Header */}
-        <header className="flex items-center gap-3 border-b border-border/20 px-4 py-3 bg-transparent backdrop-blur-sm">
+        <header className="flex items-center gap-3 border-b border-border/10 px-6 py-3.5 bg-transparent backdrop-blur-sm">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            className="text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all duration-250"
           >
             <MessageSquare className="h-5 w-5" />
           </Button>
@@ -252,128 +323,188 @@ const Chat = () => {
               ? conversations.find(c => c.id === activeConvoId)?.title || "Chat"
               : t("startNewConvo")}
           </h2>
-          {/* Profile + Settings buttons */}
           <div className="flex items-center gap-1">
             <SettingsDropdown />
             <ProfileDropdown />
           </div>
         </header>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-6">
-          <div className="mx-auto max-w-3xl space-y-6">
-            {messages.length === 0 && !isLoading && (
-              <div className="flex flex-col items-center justify-center pt-20 text-center">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                >
-                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 animate-float">
-                    <Bot className="h-8 w-8 text-primary" />
-                  </div>
-                </motion.div>
-                <motion.h3
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 0.4 }}
-                  className="text-xl font-semibold text-foreground"
-                >
-                  {t("helpToday")}
-                </motion.h3>
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3, duration: 0.4 }}
-                  className="mt-2 text-sm text-muted-foreground"
-                >
-                  {t("askAnything")}
-                </motion.p>
-              </div>
-            )}
-
-            {messages.map((msg, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-                className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                {msg.role === "assistant" && (
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <Bot className="h-4 w-4 text-primary" />
-                  </div>
-                )}
-                <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed transition-all ${msg.role === "user"
-                    ? "user-bubble shadow-lg shadow-primary/20"
-                    : "ai-bubble text-foreground"
-                    }`}
-                >
-                  {msg.role === "assistant" ? (
-                    <div className="prose prose-sm prose-invert max-w-none">
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
-                    </div>
-                  ) : (
-                    msg.content
-                  )}
-                </div>
-              </motion.div>
-            ))}
-
-            {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex gap-3"
-              >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                  <Bot className="h-4 w-4 text-primary" />
-                </div>
-                <div className="rounded-2xl ai-bubble px-4 py-3">
-                  <div className="flex gap-1.5">
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-primary/60" style={{ animationDelay: "0ms" }} />
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-primary/60" style={{ animationDelay: "150ms" }} />
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-primary/60" style={{ animationDelay: "300ms" }} />
-                  </div>
-                </div>
-              </motion.div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        </div>
-
-        {/* Input */}
-        <div className="border-t border-border/20 px-4 py-4 bg-transparent backdrop-blur-sm">
-          <div className="mx-auto flex max-w-3xl items-end gap-3">
-            <div className="flex-1 rounded-2xl border border-border/30 bg-white/5 px-4 py-3 backdrop-blur-sm focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 focus-within:shadow-lg focus-within:shadow-primary/5 transition-all duration-300">
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={t("typeMessage")}
-                rows={1}
-                className="w-full resize-none bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
-                style={{ maxHeight: "120px" }}
-                onInput={(e) => {
-                  const el = e.target as HTMLTextAreaElement;
-                  el.style.height = "auto";
-                  el.style.height = Math.min(el.scrollHeight, 120) + "px";
-                }}
-              />
-            </div>
-            <Button
-              onClick={sendMessage}
-              disabled={!input.trim() || isLoading}
-              size="icon"
-              className="h-11 w-11 shrink-0 rounded-xl btn-primary disabled:opacity-30 transition-all hover:scale-105"
+        {/* Messages or Empty State */}
+        {isEmpty ? (
+          // Centered Empty State
+          <div className="flex-1 flex flex-col items-center justify-center px-4 pb-32">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="text-center mb-12"
             >
-              <Send className="h-4 w-4" />
-            </Button>
+              <div className="relative mb-8 inline-block">
+                <div className="absolute inset-0 -m-6 bg-primary/10 rounded-full blur-3xl" />
+                <img src="/panda.svg" className="w-24 h-24 panda-logo relative z-10" alt="Panda AI" />
+              </div>
+              <h2 className="text-3xl font-semibold text-foreground mb-3">Ready when you are.</h2>
+              <p className="text-base text-muted-foreground/70">Ask me anything to get started.</p>
+            </motion.div>
+
+            {/* Centered Floating Input */}
+            <div className="w-full max-w-3xl">
+              <div className="chat-input-wrapper">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 transition-all"
+                  title="Upload file"
+                >
+                  <Paperclip className="h-4 w-4 text-muted-foreground" />
+                </button>
+                <textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder={t("typeMessage")}
+                  rows={1}
+                  className="flex-1 resize-none bg-transparent text-[15px] text-foreground outline-none placeholder:text-muted-foreground/40"
+                  style={{ maxHeight: "120px" }}
+                  onInput={(e) => {
+                    const el = e.target as HTMLTextAreaElement;
+                    el.style.height = "auto";
+                    el.style.height = Math.min(el.scrollHeight, 120) + "px";
+                  }}
+                />
+                <button
+                  onClick={handleMicClick}
+                  className={`mic-btn ${isListening ? "listening" : ""} flex items-center justify-center`}
+                  title={isListening ? "Stop recording" : "Start recording"}
+                >
+                  <Mic className="h-4 w-4 text-white" />
+                </button>
+                <Button
+                  onClick={sendMessage}
+                  disabled={!input.trim() || isLoading}
+                  size="icon"
+                  className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-250 hover:scale-105 active:scale-95"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          // Messages View with Fixed Bottom Input
+          <>
+            <div className="flex-1 overflow-y-auto px-4 py-6">
+              <div className="mx-auto max-w-4xl space-y-4">
+                {messages.map((msg, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className={`flex gap-4 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                  >
+                    {msg.role === "assistant" && (
+                      <div className="flex shrink-0 mt-1">
+                        <img src="/panda.svg" className="w-8 h-8 panda-logo" alt="Panda" />
+                      </div>
+                    )}
+                    <div
+                      className={`max-w-[75%] rounded-2xl px-5 py-3.5 text-[15px] leading-relaxed transition-all duration-250 ${msg.role === "user"
+                          ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 hover:-translate-y-0.5"
+                          : "bg-white/5 backdrop-blur-sm border border-border/20 text-foreground"
+                        }`}
+                    >
+                      {msg.role === "assistant" ? (
+                        <div className="prose prose-sm prose-invert max-w-none">
+                          <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        </div>
+                      ) : (
+                        msg.content
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+
+                {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex gap-4"
+                  >
+                    <div className="flex shrink-0 mt-1">
+                      <img src="/panda.svg" className="w-8 h-8 panda-logo" alt="Panda" />
+                    </div>
+                    <div className="rounded-2xl bg-white/5 backdrop-blur-sm border border-border/20 px-5 py-3.5">
+                      <div className="flex gap-1.5">
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-primary/60" style={{ animationDelay: "0ms" }} />
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-primary/60" style={{ animationDelay: "150ms" }} />
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-primary/60" style={{ animationDelay: "300ms" }} />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            </div>
+
+            {/* Fixed Bottom Input */}
+            <div className="px-4 py-6 bg-transparent border-t border-border/10">
+              <div className="mx-auto max-w-4xl">
+                <div className="chat-input-wrapper">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 transition-all"
+                    title="Upload file"
+                  >
+                    <Paperclip className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                  <textarea
+                    ref={inputRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={t("typeMessage")}
+                    rows={1}
+                    className="flex-1 resize-none bg-transparent text-[15px] text-foreground outline-none placeholder:text-muted-foreground/40"
+                    style={{ maxHeight: "120px" }}
+                    onInput={(e) => {
+                      const el = e.target as HTMLTextAreaElement;
+                      el.style.height = "auto";
+                      el.style.height = Math.min(el.scrollHeight, 120) + "px";
+                    }}
+                  />
+                  <button
+                    onClick={handleMicClick}
+                    className={`mic-btn ${isListening ? "listening" : ""} flex items-center justify-center`}
+                    title={isListening ? "Stop recording" : "Start recording"}
+                  >
+                    <Mic className="h-4 w-4 text-white" />
+                  </button>
+                  <Button
+                    onClick={sendMessage}
+                    disabled={!input.trim() || isLoading}
+                    size="icon"
+                    className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-250 hover:scale-105 active:scale-95"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
