@@ -144,7 +144,7 @@ const App: React.FC = () => {
   const t = TRANSLATIONS[language];
 
   return (
-    <div className={`flex flex-col min-h-[100dvh] w-full overflow-x-hidden ${config.bg} ${config.gradient} bg-gradient-to-br transition-colors duration-500`}>
+    <div className={`flex h-[100dvh] w-full overflow-hidden ${config.bg} ${config.gradient} bg-gradient-to-br transition-colors duration-500`}>
       <FloatingHearts />
       <div
         className="fixed pointer-events-none z-10 w-[300px] h-[300px] sm:w-[600px] sm:h-[600px] rounded-full blur-[120px] opacity-10 bg-pink-500 hidden sm:block"
@@ -166,7 +166,7 @@ const App: React.FC = () => {
         setIsOpen={setIsSidebarOpen}
       />
 
-      <main className="flex-1 flex flex-col relative z-20">
+      <div className="flex flex-col flex-1">
         <header className={`px-4 sm:px-6 py-4 flex items-center justify-between border-b ${config.border} bg-white/5 backdrop-blur-sm lg:hidden`}>
           <button
             onClick={() => setIsSidebarOpen(true)}
@@ -185,24 +185,28 @@ const App: React.FC = () => {
           </div>
         </header>
 
-        <ChatWindow
-          messages={currentSession?.messages || []}
-          isLoading={isLoading}
-          theme={theme}
-          language={language}
-        />
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6">
+          <ChatWindow
+            messages={currentSession?.messages || []}
+            isLoading={isLoading}
+            theme={theme}
+            language={language}
+          />
+        </div>
 
-        <ChatInput
-          onSend={onSend}
-          isLoading={isLoading}
-          theme={theme}
-          language={language}
-        />
+        <div className="sticky bottom-0 w-full">
+          <ChatInput
+            onSend={onSend}
+            isLoading={isLoading}
+            theme={theme}
+            language={language}
+          />
+        </div>
 
         <footer className={`px-4 sm:px-6 py-2 text-[10px] uppercase tracking-widest opacity-30 text-right ${config.text}`}>
           Made with ❤️ by Alakh
         </footer>
-      </main>
+      </div>
 
       <SettingsModal
         isOpen={isSettingsOpen}
